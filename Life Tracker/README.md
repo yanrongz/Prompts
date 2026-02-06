@@ -17,7 +17,7 @@ You are free to **customize the prompt based on your own needs**. For example:
 - Add a **Diet** section to log daily meals
 - Add a **Map** section to record travel experiences
 
-If you don’t have additional requirements, you can simply download and use the provided .html file directly.
+If you don’t have additional requirements, you can simply download and use the provided `.html` file directly.
 
 ## Data storage & Backup
 Please note that this is an **offline document**. All records are stored **locally in your browser**. To avoid data loss, make sure to **export your data regularly**. You can later restore your previous records by using the **import data** feature.
