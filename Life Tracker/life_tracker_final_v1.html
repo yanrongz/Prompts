@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Tracker</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --pink: #d4a5a5;
+  --pink-light: #f5e6e8;
+  --pink-dark: #b08585;
+  --gray-dark: #2d2d2d;
+  --gray: #6b6b6b;
+  --gray-light: #9a9a9a;
+  --bg: #faf8f9;
+  --border: #e8e2e4;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--gray-dark);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 220px;
+  background: var(--gray-dark);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+.logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+.nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+.nav-item {
+  padding: 12px 20px;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+.nav-item.active {
+  background: rgba(212,165,165,0.12);
+  border-left-color: var(--pink);
+  color: white;
+}
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.save-reminder {
+  background: rgba(212,165,165,0.15);
+  border: 1px solid rgba(212,165,165,0.25);
+  color: rgba(255,255,255,0.85);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.sidebar-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+.sidebar-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+.main {
+  margin-left: 220px;
+  padding: 28px 32px;
+  min-height: 100vh;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.module {
+  display: none;
+}
+.module.active {
+  display: block;
+}
+.header {
+  margin-bottom: 24px;
+}
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--gray-dark);
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--gray);
+}
+.calendar {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.calendar-month {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-dark);
+}
+.calendar-nav button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 6px;
+  color: var(--gray);
+  transition: all 0.2s;
+}
+.calendar-nav button:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+.calendar-days {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.calendar-days::-webkit-scrollbar {
+  height: 5px;
+}
+.calendar-days::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.day {
+  min-width: 42px;
+  height: 48px;
+  border: 1.5px solid var(--border);
+  background: white;
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.day:hover:not(.other-month) {
+  border-color: var(--pink);
+  transform: translateY(-1px);
+}
+.day.has-data {
+  background: var(--gray-dark);
+  border-color: var(--gray-dark);
+  color: white;
+}
+.day.selected {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: white;
+}
+.day.other-month {
+  opacity: 0.25;
+  cursor: default;
+}
+.day-num {
+  font-size: 14px;
+  font-weight: 600;
+  color: inherit;
+}
+.day-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  color: inherit;
+}
+.form {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.form-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.form-grid.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.form-grid.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+  color: var(--gray-dark);
+  letter-spacing: 0.3px;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  color: var(--gray-dark);
+  transition: all 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px var(--pink-light);
+}
+textarea {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.5;
+}
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--pink);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--pink-dark);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background: white;
+  border: 1.5px solid var(--border);
+  color: var(--gray-dark);
+}
+.btn-secondary:hover {
+  background: var(--bg);
+}
+.btn-small {
+  padding: 7px 13px;
+  font-size: 12px;
+}
+.btn-danger {
+  background: var(--pink-dark);
+  color: white;
+}
+.btn-danger:hover {
+  background: #9a6f6f;
+}
+.star-rating {
+  display: flex;
+  gap: 6px;
+}
+.star {
+  font-size: 20px;
+  color: var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+.star:hover, .star.filled {
+  color: var(--pink);
+}
+.field-section {
+  padding: 16px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+}
+.field-section.quotes {
+  background: #faf7f8;
+  border: 1.5px solid #f0e8ea;
+}
+.field-section.thoughts {
+  background: #fefbfb;
+  border: 1.5px solid #fce8e8;
+}
+.field-section.links {
+  background: #f7faf7;
+  border: 1.5px solid #e8f0e8;
+}
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  text-transform: uppercase;
+  color: var(--gray-dark);
+  letter-spacing: 0.3px;
+}
+.field-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: flex-start;
+}
+.field-item textarea, .field-item input {
+  flex: 1;
+}
+.toggle {
+  display: inline-flex;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 3px;
+}
+.toggle button {
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray);
+  transition: all 0.2s;
+}
+.toggle button.active {
+  background: white;
+  color: var(--gray-dark);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.card:hover {
+  box-shadow: 0 3px 12px rgba(212,165,165,0.15);
+  border-color: var(--pink-light);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  flex: 1;
+}
+.card-meta {
+  font-size: 11px;
+  color: var(--gray);
+  margin-bottom: 10px;
+}
+.card-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gray-dark);
+}
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.quote-block {
+  background: #faf7f8;
+  padding: 12px 14px;
+  border-left: 3px solid var(--pink);
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--gray);
+  font-style: italic;
+  border-radius: 5px;
+}
+.thought-block {
+  background: #fefbfb;
+  padding: 12px 14px;
+  border-left: 3px solid var(--pink-dark);
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--gray-dark);
+  border-radius: 5px;
+}
+.link-block {
+  background: #f7faf7;
+  padding: 12px 14px;
+  border-left: 3px solid #a5c9a5;
+  margin: 10px 0;
+  font-size: 12px;
+  border-radius: 5px;
+  word-break: break-all;
+}
+.link-block a {
+  color: var(--pink-dark);
+  text-decoration: none;
+}
+.link-block a:hover {
+  text-decoration: underline;
+}
+.task {
+  display: flex;
+  align-items: flex-start;
+  padding: 11px 14px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+.task:hover {
+  box-shadow: 0 2px 6px rgba(212,165,165,0.12);
+}
+.task.completed {
+  opacity: 0.5;
+}
+.task input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--pink);
+  flex-shrink: 0;
+}
+.task-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--gray-dark);
+}
+.task.completed .task-text {
+  text-decoration: line-through;
+  color: var(--gray-light);
+}
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.history-day {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 13px;
+}
+.history-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.history-item {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 5px;
+  padding-left: 13px;
+  position: relative;
+}
+.history-item:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--pink);
+}
+.sports-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sport-compact {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 12px 15px;
+  min-width: 180px;
+  max-width: fit-content;
+  transition: all 0.2s;
+}
+.sport-compact:hover {
+  box-shadow: 0 3px 10px rgba(212,165,165,0.15);
+  border-color: var(--pink-light);
+}
+.sport-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  margin-bottom: 5px;
+}
+.sport-value {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 7px;
+}
+.sport-notes {
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 5px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+.table-wrapper {
+  overflow-x: auto;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  background: white;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--bg);
+  padding: 11px 13px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-dark);
+  border-bottom: 1.5px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+td {
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--border);
+  color: var(--gray-dark);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover {
+  background: var(--bg);
+}
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal.active {
+  display: flex;
+}
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(212,165,165,0.35);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid var(--border);
+}
+.modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--gray-dark);
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: var(--gray-light);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+.modal-close:hover {
+  background: var(--bg);
+  color: var(--gray-dark);
+}
+.section {
+  margin-bottom: 32px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-dark);
+}
+.collapse-btn {
+  background: none;
+  border: none;
+  color: var(--pink);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+.collapse-btn:hover {
+  background: var(--pink-light);
+}
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray-light);
+  font-size: 14px;
+}
+.stats {
+  background: var(--bg);
+  padding: 12px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--gray);
+  margin-top: 12px;
+  border: 1px solid var(--border);
+}
+.stats strong {
+  color: var(--pink-dark);
+  font-weight: 600;
+}
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: var(--gray-dark);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  z-index: 1001;
+  animation: slideIn 0.3s;
+}
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 0;
+  }
+  .nav-item {
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+  .nav-item.active {
+    border-left: none;
+    border-bottom-color: var(--pink);
+  }
+  .main {
+    margin-left: 0;
+    padding: 16px;
+  }
+  .title {
+    font-size: 22px;
+  }
+  .form-grid.cols-2, .form-grid.cols-3 {
+    grid-template-columns: 1fr;
+  }
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+  .sports-grid {
+    flex-direction: column;
+  }
+  .sport-compact {
+    width: 100%;
+    max-width: none;
+  }
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">LIFE TRACKER</div>
+  <div class="nav">
+    <div class="nav-item active" data-module="tasks">Tasks</div>
+    <div class="nav-item" data-module="body">Body</div>
+    <div class="nav-item" data-module="sports">Sports</div>
+    <div class="nav-item" data-module="media">Media</div>
+    <div class="nav-item" data-module="notes">Notes</div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="save-reminder">💾 Remember to export your data regularly</div>
+    <button class="sidebar-btn" onclick="exportData()">Export Data</button>
+    <button class="sidebar-btn" onclick="document.getElementById('f').click()">Import Data</button>
+  </div>
+</div>
+
+<div class="main">
+<div class="container">
+
+<div class="module active" id="tasks-module">
+  <div class="header">
+    <h1 class="title">Tasks</h1>
+    <p class="subtitle">Daily to-do list</p>
+  </div>
+  <div class="calendar">
+    <div class="calendar-header">
+      <div class="calendar-month" id="tm"></div>
+      <div class="calendar-nav">
+        <button onclick="cm('tasks',-1)">‹</button>
+        <button onclick="cm('tasks',1)">›</button>
+      </div>
+    </div>
+    <div class="calendar-days" id="tc"></div>
+  </div>
+  <div class="form">
+    <div style="display:flex;gap:10px">
+      <input type="text" id="ti" placeholder="Add a task..." style="flex:1" onkeypress="if(event.key==='Enter')addTask()">
+      <button class="btn btn-primary" onclick="addTask()">Add</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title" id="tt"></h2>
+    </div>
+    <div id="tl"></div>
+    <div id="ts"></div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">History</h2>
+      <button class="collapse-btn" onclick="tog('th')"><span id="thb">Show</span></button>
+    </div>
+    <div id="th" style="display:none"><div class="history-grid" id="thc"></div></div>
+  </div>
+</div>
+
+<div class="module" id="body-module">
+  <div class="header">
+    <h1 class="title">Body Measurements</h1>
+    <p class="subtitle">Track your progress</p>
+  </div>
+  <div class="form">
+    <div class="form-grid cols-2">
+      <div><label>Date</label><input type="date" id="bd"></div>
+    </div>
+    <div class="form-grid cols-3">
+      <div><label>Height (cm)</label><input type="number" id="bh" step="0.1"></div>
+      <div><label>Weight (kg)</label><input type="number" id="bw" step="0.1"></div>
+      <div><label>Waist (cm)</label><input type="number" id="bwa" step="0.1"></div>
+    </div>
+    <div class="form-grid cols-3">
+      <div><label>Hips (cm)</label><input type="number" id="bhi" step="0.1"></div>
+      <div><label>Thigh (cm)</label><input type="number" id="bt" step="0.1"></div>
+      <div><label>Calf (cm)</label><input type="number" id="bc" step="0.1"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveBody()">Save</button>
+  </div>
+  <div class="section">
+    <div class="section-header"><h2 class="section-title">Measurements</h2></div>
+    <div class="table-wrapper"><table><thead><tr><th>Date</th><th>Height</th><th>Weight</th><th>Waist</th><th>Hips</th><th>Thigh</th><th>Calf</th><th>Actions</th></tr></thead><tbody id="btb"></tbody></table></div>
+    <div id="be" class="empty" style="display:none">No measurements yet</div>
+  </div>
+</div>
+
+<div class="module" id="sports-module">
+  <div class="header">
+    <h1 class="title">Sports</h1>
+    <p class="subtitle">Track your workouts</p>
+  </div>
+  <div class="calendar">
+    <div class="calendar-header">
+      <div class="calendar-month" id="sm"></div>
+      <div class="calendar-nav">
+        <button onclick="cm('sports',-1)">‹</button>
+        <button onclick="cm('sports',1)">›</button>
+      </div>
+    </div>
+    <div class="calendar-days" id="sc"></div>
+  </div>
+  <div class="form">
+    <div class="form-grid cols-2">
+      <div><label>Activity</label><input type="text" id="sa"></div>
+      <div><label>Type</label><div class="toggle"><button class="active" onclick="tst('duration')">Duration</button><button onclick="tst('reps')">Reps</button></div></div>
+    </div>
+    <div class="form-grid" id="sdr">
+      <div><label>Duration</label><input type="text" id="sd" placeholder="30 min"></div>
+    </div>
+    <div class="form-grid" id="srr" style="display:none">
+      <div><label>Reps</label><input type="text" id="sr" placeholder="50 push-ups"></div>
+    </div>
+    <div class="form-grid">
+      <div><label>Notes</label><textarea id="sn" placeholder="How did it go?"></textarea></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSports()">Save</button>
+  </div>
+  <div class="section">
+    <div class="section-header"><h2 class="section-title" id="st"></h2></div>
+    <div class="sports-grid" id="sl"></div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">History</h2>
+      <button class="collapse-btn" onclick="tog('sh')"><span id="shb">Show</span></button>
+    </div>
+    <div id="sh" style="display:none"><div class="history-grid" id="shc"></div></div>
+  </div>
+</div>
+
+<div class="module" id="media-module">
+  <div class="header">
+    <h1 class="title">Media</h1>
+    <p class="subtitle">Books, movies, podcasts & more</p>
+  </div>
+  <div class="calendar">
+    <div class="calendar-header">
+      <div class="calendar-month" id="mm"></div>
+      <div class="calendar-nav">
+        <button onclick="cm('media',-1)">‹</button>
+        <button onclick="cm('media',1)">›</button>
+      </div>
+    </div>
+    <div class="calendar-days" id="mc"></div>
+  </div>
+  <div class="form">
+    <div class="form-grid cols-2">
+      <div><label>Type</label><select id="mt" onchange="umf()"><option value="book">Book</option><option value="movie">Movie</option><option value="podcast">Podcast</option><option value="news">News</option><option value="video">Video</option><option value="other">Other</option></select></div>
+      <div><label>Title</label><input type="text" id="mti"></div>
+    </div>
+    <div class="form-grid">
+      <div><label>Rating</label><div class="star-rating" id="mr"><span class="star" data-v="1">☆</span><span class="star" data-v="2">☆</span><span class="star" data-v="3">☆</span><span class="star" data-v="4">☆</span><span class="star" data-v="5">☆</span></div></div>
+    </div>
+    <div id="mls" style="display:none">
+      <div class="field-section links"><span class="field-label">Links</span><div id="mll"><div class="field-item"><input type="url" placeholder="https://..."><button class="btn btn-secondary btn-small" onclick="addLink()">+</button></div></div></div>
+    </div>
+    <div class="field-section quotes"><span class="field-label">Quotes / Excerpts</span><div id="mql"><div class="field-item"><textarea placeholder="Add a quote..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="addQuote()">+</button></div></div></div>
+    <div class="field-section thoughts"><span class="field-label">Your Thoughts</span><div id="mtl"><div class="field-item"><textarea placeholder="Your reflection..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="addThought()">+</button></div></div></div>
+    <button class="btn btn-primary" onclick="saveMedia()">Save</button>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title" id="mt2"></h2>
+      <select class="btn btn-secondary btn-small" onchange="renM()" style="border:1.5px solid var(--border)"><option value="type">By Type</option></select>
+    </div>
+    <div id="ml"></div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">History</h2>
+      <button class="collapse-btn" onclick="tog('mh')"><span id="mhb">Show</span></button>
+    </div>
+    <div id="mh" style="display:none"><div class="history-grid" id="mhc"></div></div>
+  </div>
+</div>
+
+<div class="module" id="notes-module">
+  <div class="header">
+    <h1 class="title">Notes</h1>
+    <p class="subtitle">Quick thoughts and ideas</p>
+  </div>
+  <div class="calendar">
+    <div class="calendar-header">
+      <div class="calendar-month" id="nm"></div>
+      <div class="calendar-nav">
+        <button onclick="cm('notes',-1)">‹</button>
+        <button onclick="cm('notes',1)">›</button>
+      </div>
+    </div>
+    <div class="calendar-days" id="nc"></div>
+  </div>
+  <div class="form">
+    <div class="form-grid">
+      <div><label>Content</label><textarea id="nco" style="min-height:100px" placeholder="Write your note..."></textarea></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveNote()">Save</button>
+  </div>
+  <div class="section">
+    <div class="section-header"><h2 class="section-title" id="nt"></h2></div>
+    <div id="nl"></div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">History</h2>
+      <button class="collapse-btn" onclick="tog('nh')"><span id="nhb">Show</span></button>
+    </div>
+    <div id="nh" style="display:none"><div class="history-grid" id="nhc"></div></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="modal" id="meb"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Edit Measurement</h3><button class="modal-close" onclick="clm('meb')">×</button></div><div class="form-grid cols-3"><div><label>Height</label><input type="number" id="ebh" step="0.1"></div><div><label>Weight</label><input type="number" id="ebw" step="0.1"></div><div><label>Waist</label><input type="number" id="ebwa" step="0.1"></div></div><div class="form-grid cols-3"><div><label>Hips</label><input type="number" id="ebhi" step="0.1"></div><div><label>Thigh</label><input type="number" id="ebt" step="0.1"></div><div><label>Calf</label><input type="number" id="ebc" step="0.1"></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" onclick="updBody()">Update</button><button class="btn btn-secondary" onclick="clm('meb')">Cancel</button></div></div></div>
+
+<div class="modal" id="mes"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Edit Sports Entry</h3><button class="modal-close" onclick="clm('mes')">×</button></div><div class="form-grid cols-2"><div><label>Activity</label><input type="text" id="esa"></div><div><label>Value</label><input type="text" id="esv"></div></div><div class="form-grid"><div><label>Notes</label><textarea id="esn"></textarea></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" onclick="updSports()">Update</button><button class="btn btn-secondary" onclick="clm('mes')">Cancel</button></div></div></div>
+
+<div class="modal" id="mem"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Edit Media Entry</h3><button class="modal-close" onclick="clm('mem')">×</button></div><div class="form-grid cols-2"><div><label>Type</label><select id="emt"><option value="book">Book</option><option value="movie">Movie</option><option value="podcast">Podcast</option><option value="news">News</option><option value="video">Video</option><option value="other">Other</option></select></div><div><label>Title</label><input type="text" id="emti"></div></div><div class="form-grid"><div><label>Rating</label><div class="star-rating" id="emr"><span class="star" data-v="1">☆</span><span class="star" data-v="2">☆</span><span class="star" data-v="3">☆</span><span class="star" data-v="4">☆</span><span class="star" data-v="5">☆</span></div></div></div><div class="field-section links"><span class="field-label">Links</span><div id="emll"></div></div><div class="field-section quotes"><span class="field-label">Quotes</span><div id="emql"></div></div><div class="field-section thoughts"><span class="field-label">Thoughts</span><div id="emtl"></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" onclick="updMedia()">Update</button><button class="btn btn-secondary" onclick="clm('mem')">Cancel</button></div></div></div>
+
+<div class="modal" id="men"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Edit Note</h3><button class="modal-close" onclick="clm('men')">×</button></div><div class="form-grid"><div><label>Content</label><textarea id="enco" style="min-height:120px"></textarea></div></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" onclick="updNote()">Update</button><button class="btn btn-secondary" onclick="clm('men')">Cancel</button></div></div></div>
+
+<input type="file" id="f" accept=".json" onchange="impData(event)" style="display:none">
+
+<script>
+const S={cal:{tasks:{y:new Date().getFullYear(),m:new Date().getMonth(),sel:fmt(new Date())},sports:{y:new Date().getFullYear(),m:new Date().getMonth(),sel:fmt(new Date())},media:{y:new Date().getFullYear(),m:new Date().getMonth(),sel:fmt(new Date())},notes:{y:new Date().getFullYear(),m:new Date().getMonth(),sel:fmt(new Date())}},sportsType:'duration',mediaRating:0,editMediaRating:0,editIdx:null};
+function fmt(d){const dt=new Date(d);return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;}
+function fmtL(s){return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+function toast(msg){const e=document.querySelector('.toast');if(e)e.remove();const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
+function save(k,d){try{localStorage.setItem(k,JSON.stringify(d));toast('Saved');return true;}catch(e){console.error(e);toast('Save failed');return false;}}
+function load(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null;}catch(e){console.error(e);return null;}}
+
+function initStar(cId,sKey){const c=document.getElementById(cId);if(!c)return;const stars=c.querySelectorAll('.star');stars.forEach((s,i)=>{s.addEventListener('click',function(){const v=parseInt(this.dataset.v);S[sKey]=v;updStars(c,v);});s.addEventListener('mouseenter',function(){updStars(c,parseInt(this.dataset.v),true);});});c.addEventListener('mouseleave',()=>updStars(c,S[sKey]));}
+function updStars(c,r,isH=false){const stars=c.querySelectorAll('.star');stars.forEach((s,i)=>{if(i<r){s.classList.add('filled');s.textContent='★';}else{s.classList.remove('filled');s.textContent='☆';}});}
+
+function renCal(mod){const c=S.cal[mod];const grid=document.getElementById(mod[0]+'c');const monthEl=document.getElementById(mod[0]+'m');if(!grid||!monthEl)return;const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];monthEl.textContent=`${months[c.m]} ${c.y}`;const first=new Date(c.y,c.m,1);const last=new Date(c.y,c.m+1,0);const prevLast=new Date(c.y,c.m,0);const start=first.getDay();const days=last.getDate();const key=`t${mod.charAt(0).toUpperCase()+mod.slice(1)}`;const all=load(key)||(mod==='tasks'?{}:[]);grid.innerHTML='';const dayLbls=['SUN','MON','TUE','WED','THU','FRI','SAT'];for(let i=start-1;i>=0;i--){const btn=document.createElement('button');btn.className='day other-month';btn.innerHTML=`<div class="day-num">${prevLast.getDate()-i}</div>`;btn.disabled=true;grid.appendChild(btn);}for(let d=1;d<=days;d++){const btn=document.createElement('button');btn.className='day';const dateStr=`${c.y}-${String(c.m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dayIdx=new Date(dateStr).getDay();btn.innerHTML=`<div class="day-num">${d}</div><div class="day-label">${dayLbls[dayIdx]}</div>`;let hasData=false;if(mod==='tasks'){hasData=all[dateStr]&&all[dateStr].length>0;}else{hasData=all.some(item=>item.date===dateStr);}if(hasData)btn.classList.add('has-data');if(c.sel===dateStr)btn.classList.add('selected');btn.onclick=()=>selDate(mod,dateStr);grid.appendChild(btn);}}
+function cm(mod,delta){const c=S.cal[mod];c.m+=delta;if(c.m>11){c.m=0;c.y++;}if(c.m<0){c.m=11;c.y--;}renCal(mod);}
+function selDate(mod,date){S.cal[mod].sel=date;renCal(mod);if(mod==='tasks')renT();if(mod==='sports')renS();if(mod==='media')renM();if(mod==='notes')renN();}
+
+function addTask(){const inp=document.getElementById('ti');const txt=inp.value.trim();if(!txt)return;const date=S.cal.tasks.sel;const all=load('tTasks')||{};if(!all[date])all[date]=[];all[date].push({text:txt,done:false,created:new Date().toISOString()});save('tTasks',all);inp.value='';renCal('tasks');renT();renTH();}
+function togTask(date,idx){const all=load('tTasks')||{};if(all[date]&&all[date][idx]){all[date][idx].done=!all[date][idx].done;save('tTasks',all);renT();renTH();}}
+function delTask(date,idx){if(!confirm('Delete this task?'))return;const all=load('tTasks')||{};if(all[date]){all[date].splice(idx,1);if(all[date].length===0)delete all[date];save('tTasks',all);renCal('tasks');renT();renTH();}}
+function renT(){const date=S.cal.tasks.sel;const all=load('tTasks')||{};const tasks=all[date]||[];document.getElementById('tt').textContent=fmtL(date);const list=document.getElementById('tl');if(tasks.length===0){list.innerHTML='<div class="empty">No tasks for today</div>';document.getElementById('ts').innerHTML='';return;}const done=tasks.filter(t=>t.done).length;document.getElementById('ts').innerHTML=`<div class="stats">Completed <strong>${done}</strong> of <strong>${tasks.length}</strong> tasks</div>`;list.innerHTML=tasks.map((t,i)=>`<div class="task ${t.done?'completed':''}"><input type="checkbox" ${t.done?'checked':''} onchange="togTask('${date}',${i})"><span class="task-text">${esc(t.text)}</span><button class="btn btn-danger btn-small" onclick="delTask('${date}',${i})">Delete</button></div>`).join('');}
+function renTH(){const all=load('tTasks')||{};const dates=Object.keys(all).sort().reverse().slice(0,30);const cont=document.getElementById('thc');if(!cont)return;if(dates.length===0){cont.innerHTML='<div class="empty">No history</div>';return;}cont.innerHTML=dates.map(date=>{const tasks=all[date];return `<div class="history-day"><div class="history-date">${fmtL(date)}</div>${tasks.map(t=>`<div class="history-item">${t.done?'✓':'○'} ${esc(t.text)}</div>`).join('')}</div>`;}).join('');}
+
+function saveBody(){const date=document.getElementById('bd').value;if(!date){alert('Please select a date');return;}const m=load('tBody')||[];m.unshift({date,height:document.getElementById('bh').value||'-',weight:document.getElementById('bw').value||'-',waist:document.getElementById('bwa').value||'-',hips:document.getElementById('bhi').value||'-',thigh:document.getElementById('bt').value||'-',calf:document.getElementById('bc').value||'-'});save('tBody',m);document.getElementById('bh').value='';document.getElementById('bw').value='';document.getElementById('bwa').value='';document.getElementById('bhi').value='';document.getElementById('bt').value='';document.getElementById('bc').value='';renB();}
+function editBody(idx){const m=load('tBody')||[];const e=m[idx];document.getElementById('ebh').value=e.height==='-'?'':e.height;document.getElementById('ebw').value=e.weight==='-'?'':e.weight;document.getElementById('ebwa').value=e.waist==='-'?'':e.waist;document.getElementById('ebhi').value=e.hips==='-'?'':e.hips;document.getElementById('ebt').value=e.thigh==='-'?'':e.thigh;document.getElementById('ebc').value=e.calf==='-'?'':e.calf;S.editIdx=idx;document.getElementById('meb').classList.add('active');}
+function updBody(){const m=load('tBody')||[];m[S.editIdx]={...m[S.editIdx],height:document.getElementById('ebh').value||'-',weight:document.getElementById('ebw').value||'-',waist:document.getElementById('ebwa').value||'-',hips:document.getElementById('ebhi').value||'-',thigh:document.getElementById('ebt').value||'-',calf:document.getElementById('ebc').value||'-'};save('tBody',m);clm('meb');renB();}
+function delBody(idx){if(!confirm('Delete this record?'))return;const m=load('tBody')||[];m.splice(idx,1);save('tBody',m);renB();}
+function renB(){const m=load('tBody')||[];const tbody=document.getElementById('btb');const empty=document.getElementById('be');if(!tbody||!empty)return;if(m.length===0){tbody.innerHTML='';empty.style.display='block';document.querySelector('.table-wrapper').style.display='none';return;}empty.style.display='none';document.querySelector('.table-wrapper').style.display='block';tbody.innerHTML=m.map((e,i)=>`<tr><td>${fmtL(e.date)}</td><td>${e.height}</td><td>${e.weight}</td><td>${e.waist}</td><td>${e.hips}</td><td>${e.thigh}</td><td>${e.calf}</td><td style="white-space:nowrap"><button class="btn btn-secondary btn-small" onclick="editBody(${i})">Edit</button> <button class="btn btn-danger btn-small" onclick="delBody(${i})">Delete</button></td></tr>`).join('');}
+
+function tst(type){S.sportsType=type;document.querySelectorAll('#sports-module .toggle button').forEach(b=>{b.classList.toggle('active',b.textContent.toLowerCase()===type);});document.getElementById('sdr').style.display=type==='duration'?'grid':'none';document.getElementById('srr').style.display=type==='reps'?'grid':'none';}
+function saveSports(){const date=S.cal.sports.sel;const activity=document.getElementById('sa').value.trim();const value=S.sportsType==='duration'?document.getElementById('sd').value.trim():document.getElementById('sr').value.trim();const notes=document.getElementById('sn').value.trim();if(!activity||!value){alert('Please fill activity and value');return;}const all=load('tSports')||[];all.push({date,activity,type:S.sportsType,value,notes,created:new Date().toISOString()});save('tSports',all);document.getElementById('sa').value='';document.getElementById('sd').value='';document.getElementById('sr').value='';document.getElementById('sn').value='';renCal('sports');renS();renSH();}
+function editSports(idx){const all=load('tSports')||[];const e=all[idx];document.getElementById('esa').value=e.activity;document.getElementById('esv').value=e.value;document.getElementById('esn').value=e.notes||'';S.editIdx=idx;document.getElementById('mes').classList.add('active');}
+function updSports(){const all=load('tSports')||[];all[S.editIdx].activity=document.getElementById('esa').value;all[S.editIdx].value=document.getElementById('esv').value;all[S.editIdx].notes=document.getElementById('esn').value;save('tSports',all);clm('mes');renS();renSH();}
+function delSports(idx){if(!confirm('Delete this record?'))return;const all=load('tSports')||[];all.splice(idx,1);save('tSports',all);renCal('sports');renS();renSH();}
+function renS(){const date=S.cal.sports.sel;const all=load('tSports')||[];const sports=all.filter(s=>s.date===date);document.getElementById('st').textContent=fmtL(date);const list=document.getElementById('sl');if(!list)return;if(sports.length===0){list.innerHTML='<div class="empty">No entries for today</div>';return;}list.innerHTML=sports.map(e=>{const idx=all.indexOf(e);return `<div class="sport-compact"><div class="sport-name">${esc(e.activity)}</div><div class="sport-value">${e.type==='duration'?'⏱':'#'} ${esc(e.value)}</div>${e.notes?`<div class="sport-notes">${esc(e.notes)}</div>`:''}<div style="display:flex;gap:7px;margin-top:10px"><button class="btn btn-secondary btn-small" onclick="editSports(${idx})">Edit</button><button class="btn btn-danger btn-small" onclick="delSports(${idx})">Delete</button></div></div>`;}).join('');}
+function renSH(){const all=load('tSports')||[];const byDate={};all.forEach(s=>{if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});const dates=Object.keys(byDate).sort().reverse().slice(0,30);const cont=document.getElementById('shc');if(!cont)return;if(dates.length===0){cont.innerHTML='<div class="empty">No history</div>';return;}cont.innerHTML=dates.map(date=>`<div class="history-day"><div class="history-date">${fmtL(date)}</div>${byDate[date].map(s=>`<div class="history-item">${esc(s.activity)} - ${esc(s.value)}</div>`).join('')}</div>`).join('');}
+
+function umf(){const type=document.getElementById('mt').value;const showLinks=!['book','movie'].includes(type);document.getElementById('mls').style.display=showLinks?'block':'none';}
+function addLink(){document.getElementById('mll').insertAdjacentHTML('beforeend',`<div class="field-item"><input type="url" placeholder="https://..."><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`);}
+function addQuote(){document.getElementById('mql').insertAdjacentHTML('beforeend',`<div class="field-item"><textarea placeholder="Add a quote..." rows="2"></textarea><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`);}
+function addThought(){document.getElementById('mtl').insertAdjacentHTML('beforeend',`<div class="field-item"><textarea placeholder="Your reflection..." rows="2"></textarea><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`);}
+function saveMedia(){const date=S.cal.media.sel;const type=document.getElementById('mt').value;const title=document.getElementById('mti').value.trim();const rating=S.mediaRating;if(!title){alert('Please enter a title');return;}const links=Array.from(document.querySelectorAll('#mll input')).map(i=>i.value.trim()).filter(l=>l);const quotes=Array.from(document.querySelectorAll('#mql textarea')).map(t=>t.value.trim()).filter(q=>q);const thoughts=Array.from(document.querySelectorAll('#mtl textarea')).map(t=>t.value.trim()).filter(t=>t);const all=load('tMedia')||[];all.push({date,type,title,rating,links,quotes,thoughts,created:new Date().toISOString()});save('tMedia',all);document.getElementById('mti').value='';S.mediaRating=0;updStars(document.getElementById('mr'),0);document.getElementById('mll').innerHTML=`<div class="field-item"><input type="url" placeholder="https://..."><button class="btn btn-secondary btn-small" onclick="addLink()">+</button></div>`;document.getElementById('mql').innerHTML=`<div class="field-item"><textarea placeholder="Add a quote..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="addQuote()">+</button></div>`;document.getElementById('mtl').innerHTML=`<div class="field-item"><textarea placeholder="Your reflection..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="addThought()">+</button></div>`;renCal('media');renM();renMH();}
+function editMedia(idx){const all=load('tMedia')||[];const e=all[idx];document.getElementById('emt').value=e.type;document.getElementById('emti').value=e.title;S.editMediaRating=e.rating||0;updStars(document.getElementById('emr'),e.rating||0);document.getElementById('emll').innerHTML=(e.links&&e.links.length>0?e.links.map(l=>`<div class="field-item"><input type="url" value="${esc(l)}"><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`).join(''):'')+`<div class="field-item"><input type="url" placeholder="https://..."><button class="btn btn-secondary btn-small" onclick="this.parentElement.insertAdjacentHTML('beforebegin','<div class=field-item><input type=url><button class=\\'btn btn-danger btn-small\\' onclick=\\'this.parentElement.remove()\\'>−</button></div>')">+</button></div>`;document.getElementById('emql').innerHTML=(e.quotes&&e.quotes.length>0?e.quotes.map(q=>`<div class="field-item"><textarea rows="2">${esc(q)}</textarea><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`).join(''):'')+`<div class="field-item"><textarea placeholder="Add a quote..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="this.parentElement.insertAdjacentHTML('beforebegin','<div class=field-item><textarea rows=2></textarea><button class=\\'btn btn-danger btn-small\\' onclick=\\'this.parentElement.remove()\\'>−</button></div>')">+</button></div>`;document.getElementById('emtl').innerHTML=(e.thoughts&&e.thoughts.length>0?e.thoughts.map(t=>`<div class="field-item"><textarea rows="2">${esc(t)}</textarea><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">−</button></div>`).join(''):'')+`<div class="field-item"><textarea placeholder="Your reflection..." rows="2"></textarea><button class="btn btn-secondary btn-small" onclick="this.parentElement.insertAdjacentHTML('beforebegin','<div class=field-item><textarea rows=2></textarea><button class=\\'btn btn-danger btn-small\\' onclick=\\'this.parentElement.remove()\\'>−</button></div>')">+</button></div>`;S.editIdx=idx;document.getElementById('mem').classList.add('active');}
+function updMedia(){const all=load('tMedia')||[];const links=Array.from(document.querySelectorAll('#emll input')).map(i=>i.value.trim()).filter(l=>l);const quotes=Array.from(document.querySelectorAll('#emql textarea')).map(t=>t.value.trim()).filter(q=>q);const thoughts=Array.from(document.querySelectorAll('#emtl textarea')).map(t=>t.value.trim()).filter(t=>t);all[S.editIdx]={...all[S.editIdx],type:document.getElementById('emt').value,title:document.getElementById('emti').value,rating:S.editMediaRating,links,quotes,thoughts};save('tMedia',all);clm('mem');renM();renMH();}
+function delMedia(idx){if(!confirm('Delete this record?'))return;const all=load('tMedia')||[];all.splice(idx,1);save('tMedia',all);renCal('media');renM();renMH();}
+function renM(){const date=S.cal.media.sel;const all=load('tMedia')||[];let media=all.filter(m=>m.date===date);media.sort((a,b)=>a.type.localeCompare(b.type));document.getElementById('mt2').textContent=fmtL(date);const list=document.getElementById('ml');if(!list)return;if(media.length===0){list.innerHTML='<div class="empty">No entries for today</div>';return;}list.innerHTML=media.map(e=>{const idx=all.indexOf(e);const stars='★'.repeat(e.rating||0)+'☆'.repeat(5-(e.rating||0));return `<div class="card"><div class="card-header"><div class="card-title">${esc(e.title)}</div><div style="color:var(--pink);font-size:15px;white-space:nowrap;margin-left:12px">${stars}</div></div><div class="card-meta">${e.type.charAt(0).toUpperCase()+e.type.slice(1)}</div>${e.links&&e.links.length>0?e.links.map(l=>`<div class="link-block"><a href="${esc(l)}" target="_blank">${esc(l)}</a></div>`).join(''):''}${e.quotes&&e.quotes.length>0?e.quotes.map(q=>`<div class="quote-block">"${esc(q)}"</div>`).join(''):''}${e.thoughts&&e.thoughts.length>0?e.thoughts.map(t=>`<div class="thought-block">${esc(t)}</div>`).join(''):''}<div class="card-actions"><button class="btn btn-secondary btn-small" onclick="editMedia(${idx})">Edit</button><button class="btn btn-danger btn-small" onclick="delMedia(${idx})">Delete</button></div></div>`;}).join('');}
+function renMH(){const all=load('tMedia')||[];const byDate={};all.forEach(m=>{if(!byDate[m.date])byDate[m.date]=[];byDate[m.date].push(m);});const dates=Object.keys(byDate).sort().reverse().slice(0,30);const cont=document.getElementById('mhc');if(!cont)return;if(dates.length===0){cont.innerHTML='<div class="empty">No history</div>';return;}cont.innerHTML=dates.map(date=>`<div class="history-day"><div class="history-date">${fmtL(date)}</div>${byDate[date].map(m=>{const stars='★'.repeat(m.rating||0);return `<div class="history-item">${esc(m.title)} ${stars?`<span style="color:var(--pink);font-size:11px">${stars}</span>`:''}</div>`;}).join('')}</div>`).join('');}
+
+function saveNote(){const date=S.cal.notes.sel;const content=document.getElementById('nco').value.trim();if(!content){alert('Please enter content');return;}const all=load('tNotes')||[];all.push({date,content,created:new Date().toISOString()});save('tNotes',all);document.getElementById('nco').value='';renCal('notes');renN();renNH();}
+function editNote(idx){const all=load('tNotes')||[];document.getElementById('enco').value=all[idx].content;S.editIdx=idx;document.getElementById('men').classList.add('active');}
+function updNote(){const all=load('tNotes')||[];all[S.editIdx].content=document.getElementById('enco').value;save('tNotes',all);clm('men');renN();renNH();}
+function delNote(idx){if(!confirm('Delete this note?'))return;const all=load('tNotes')||[];all.splice(idx,1);save('tNotes',all);renCal('notes');renN();renNH();}
+function renN(){const date=S.cal.notes.sel;const all=load('tNotes')||[];const notes=all.filter(n=>n.date===date);document.getElementById('nt').textContent=fmtL(date);const list=document.getElementById('nl');if(!list)return;if(notes.length===0){list.innerHTML='<div class="empty">No notes for today</div>';return;}list.innerHTML=notes.map(e=>{const idx=all.indexOf(e);const time=new Date(e.created).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});return `<div class="card"><div class="card-meta">${time}</div><div class="card-content">${esc(e.content).replace(/\n/g,'<br>')}</div><div class="card-actions"><button class="btn btn-secondary btn-small" onclick="editNote(${idx})">Edit</button><button class="btn btn-danger btn-small" onclick="delNote(${idx})">Delete</button></div></div>`;}).join('');}
+function renNH(){const all=load('tNotes')||[];const byDate={};all.forEach(n=>{if(!byDate[n.date])byDate[n.date]=[];byDate[n.date].push(n);});const dates=Object.keys(byDate).sort().reverse().slice(0,30);const cont=document.getElementById('nhc');if(!cont)return;if(dates.length===0){cont.innerHTML='<div class="empty">No history</div>';return;}cont.innerHTML=dates.map(date=>`<div class="history-day"><div class="history-date">${fmtL(date)}</div>${byDate[date].map(n=>`<div class="history-item">${esc(n.content.substring(0,50))}${n.content.length>50?'...':''}</div>`).join('')}</div>`).join('');}
+
+function tog(id){const el=document.getElementById(id);const btn=document.getElementById(id+'b');if(!el||!btn)return;const hidden=el.style.display==='none';el.style.display=hidden?'block':'none';btn.textContent=hidden?'Hide':'Show';}
+function clm(id){document.getElementById(id).classList.remove('active');}
+
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',function(){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));this.classList.add('active');document.getElementById(this.dataset.module+'-module').classList.add('active');});});
+
+function exportData(){const data={tasks:load('tTasks')||{},body:load('tBody')||[],sports:load('tSports')||[],media:load('tMedia')||[],notes:load('tNotes')||[],exported:new Date().toISOString()};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`life-tracker-${fmt(new Date())}.json`;a.click();URL.revokeObjectURL(url);toast('Data exported');}
+function impData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);if(!confirm('Import data? This will merge with existing data.'))return;if(data.tasks)save('tTasks',data.tasks);if(data.body)save('tBody',data.body);if(data.sports)save('tSports',data.sports);if(data.media)save('tMedia',data.media);if(data.notes)save('tNotes',data.notes);init();toast('Data imported');}catch(err){alert('Invalid file format');console.error(err);}};reader.readAsText(file);e.target.value='';}
+
+function init(){document.getElementById('bd').value=fmt(new Date());umf();initStar('mr','mediaRating');initStar('emr','editMediaRating');renCal('tasks');renCal('sports');renCal('media');renCal('notes');renT();renTH();renB();renS();renSH();renM();renMH();renN();renNH();}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
