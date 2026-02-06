@@ -22,5 +22,39 @@ If you don’t have additional requirements, you can simply download and use the
 ## Data storage & Backup
 Please note that this is an **offline document**. All records are stored **locally in your browser**. To avoid data loss, make sure to **export your data regularly**. You can later restore your previous records by using the **import data** feature.
 
+## Prompt
+**Role**: Senior Full-Stack Web Developer & High-End UI/UX Designer.  
+
+**Objective**: Build a minimalist, sophisticated, and responsive personal management web application. The design must follow ergonomic principles, featuring a "Premium Grayscale" aesthetic (Grey and pink) that feels professional and timeless.  
+
+**Core Technical Requirements**:  
+1. **Data Persistence & Portability**:
+- No external database; all data must persist in `localStorage`.  
+- Feature a prominent **"Backup Reminder"** to encourage users to save data.
+- Implement Export as `JSON` and Upload/Import `.json` functionality to ensure zero data loss and cross-device continuity.
+2. **Layout & Navigation**:
+- Left-side navigation bar for switching between modules.
+- Fully responsive design (Mobile/Tablet/Desktop) using CSS Flex/Grid.
+3. **The Modular Calendar System**:
+- Each module contains a minimalist, horizontal scroll-style calendar at the top.
+- The calendar should be small and discrete (e.g., a single row of dates).
+- Clicking a date filters the view to show only that day's records.
+- Visual Indicator: Circular date buttons become darker/filled if data exists for that day.
+4. **Module Content & Sequence**:
+- **Tasks**: Daily to-do list. History must show specific task text/status, not just completion percentages.
+- **Body**: Table-style log for Height, Weight, Waist, Hip, Thigh, and Calf measurements. Data accumulates row-by-row; entries must be editable.
+- **Sports**: Grid-style cards per entry (not full-width). Records: Project, duration/reps, and reflections.
+- **Media**: Fields for Type (Book, Movie, Podcast, News, Video, Others), Title, and a 5-star rating system (empty stars).
+  1. Special fields: Multi-line "Excerpts" and "Reflections" (each a distinct list).
+  2. For Podcast, News, Video, and Others: Add a "Links" field.
+  3. Sorting: By Type.
+5. **Notes**: Post-it style entries for fragments of inspiration. No title field. History grouped by Day.
+
+
+**UI/UX Design Guidelines**:
+- **Aesthetics**: Senior-level minimalism. No childish icons. Elegant typography. High-contrast but soft grayscale.
+- **Interaction**: History sections should be "Collapsible" (hidden by default, expandable by user).
+- **Refinement**: Everything must be editable. Buttons should be sleek and appropriately sized (not bulky).
+
 ## Final Thoughts
 I hope this idea helps you better organize your life amd make day-to-day tracking more enjoyable.😊
