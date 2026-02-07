@@ -72,7 +72,7 @@ All design decisions must follow ergonomic and **human-centered** design princip
 - **Refinement**: **Everything must be editable**. Buttons should be sleek and appropriately sized (not bulky).
 
 **Self-Review Requirement**  
-Before returning the final result:
+Check every detail before returning the final result!!!
 - Carefully verify that **all requirements** above are fully satisfied.
 - Ensure the final output **contains no runtime errors**.
 
