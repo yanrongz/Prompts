@@ -36,33 +36,45 @@ All design decisions must follow ergonomic and **human-centered** design princip
 - Feature a prominent **"Backup Reminder"** to encourage users to save data.
 - Implement Export as `JSON` and Upload/Import `.json` functionality to ensure zero data loss and cross-device continuity.
 2. **Layout & Navigation**:
-- Left-side navigation bar for switching between modules.
+- **Left-side navigation bar** for switching between modules.
 - Fully **responsive design** (Mobile/Tablet/Desktop) using CSS Flex/Grid.
 3. **The Modular Calendar System**:
-- Each module except **Body** contains a minimalist, horizontal scroll-style calendar at the top.
-- The calendar should be small and discrete (e.g., a single row of dates).
+- Each module except **Body** contains a minimalist, horizontal scroll-style calendar at the top. The calendar should be small and discrete (e.g., a single row of dates).
 - Clicking a date shows only the records for that specific day.
 - Circular date buttons become darker/filled if data exists for that day.
 4. **Module Content & Sequence**:
-- **Tasks**: Daily to-do list. History must show specific task text/status, not just completion percentages.
-- **Body**: Table-style log for Height, Weight, Waist, Hip, Thigh, and Calf measurements. Data accumulates row-by-row; entries must be editable.
-- **Sports**: Grid-style cards per entry (not full-width). Records: Project, duration/reps, and reflections.
-- **Media**: Fields for Type (Book, Movie, Podcast, News, Video, Others), Title, and a 5-star rating system (empty stars).
-  1. Special fields: Multi-line "Excerpts" and "Reflections" (each a distinct list).
-  2. For Podcast, News, Video, and Others: Add a "Links" field.
-  3. Sorting: By Type.
-5. **Notes**: Post-it style entries for fragments of inspiration. No title field. History grouped by Day.
+- **Tasks**:
+  - Daily to-do list.
+  - History must show specific task text/status, not just completion percentages.
+- **Body**:
+  - Records: Height, Weight, Waist, Hip, Thigh, and Calf measurements.
+  - Data accumulates row-by-row.
+  - All current and historical entries must be editable.
+- **Sports**:
+  - Records: Project, duration/reps, and reflections.
+  - Grid-style cards per entry. Cards auto-size based on content (not full-width by default).
+  - Historical records displayed at the bottom
+- **Media**:
+  - Fields for Type (Book, Movie, Podcast, News, Video, Others), Title, and a 5-star rating system (empty star style).
+  - Excerpts and Reflections: designed as separate sections, each allows multiple one-sentence entries.
+  - For Podcast, News, Video, and Others: Add a "Links" field.
+  - Sorting: By Type.
+  - Historical records displayed at the bottom.
+- **Notes**:
+  - Records: Quick inspiration notes, diary entries, etc.
+  - Post-it style entries for fragments of inspiration. No title field.
+  - Historical records displayed at the bottom and grouped by Day.
 
 
 **UI/UX Design Guidelines**
-- **Aesthetics**: Senior-level minimalism. No childish icons. Elegant typography. High-contrast but soft grayscale.
-- **Interaction**: History sections should be "Collapsible" (hidden by default, expandable by user).
-- **Refinement**: Everything must be editable. Buttons should be sleek and appropriately sized (not bulky).
+- **Aesthetics**: Senior-level minimalism. No childish icons. **Module sizes must adapt naturally to content**.
+- **Interaction**: History sections should be **"Collapsible"** (hidden by default, expandable by user).
+- **Refinement**: **Everything must be editable**. Buttons should be sleek and appropriately sized (not bulky).
 
 **Self-Review Requirement**  
 Before returning the final result:
-- Carefully verify that all requirements above are fully satisfied
-- Ensure the final output contains no runtime errors
+- Carefully verify that **all requirements** above are fully satisfied.
+- Ensure the final output **contains no runtime errors**.
 
 ## Final Thoughts
 I hope this idea helps you better organize your life amd make day-to-day tracking more enjoyable.😊
